@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMINA BAR · Drink Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c9a84c;
+  --gold2:#e8c96a;
+  --bg:#0c0c0c;
+  --card:#141414;
+  --card2:#1a1a1a;
+  --border:rgba(201,168,76,0.18);
+  --border2:rgba(255,255,255,0.07);
+  --text:#e8e0d0;
+  --muted:rgba(232,224,208,0.5);
+  --premium:#c9a84c;
+  --radius:10px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Raleway',sans-serif;
+  font-weight:400;
+  min-height:100vh;
+  padding:0;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* ── LOADER ── */
+#loader{
+  position:fixed;inset:0;z-index:9999;
+  background:#080808;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  transition:opacity 0.8s cubic-bezier(0.4,0,0.2,1),visibility 0.8s;
+}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+
+/* radial ambient glow behind logo */
+.loader-glow{
+  position:absolute;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,168,76,0.12) 0%,transparent 70%);
+  animation:glowPulse 2.4s ease-in-out infinite;
+}
+@keyframes glowPulse{0%,100%{transform:scale(0.9);opacity:0.6}50%{transform:scale(1.15);opacity:1}}
+
+/* rotating ring */
+.loader-ring-wrap{position:relative;width:110px;height:110px;margin-bottom:32px}
+.loader-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px solid transparent;
+  border-top-color:var(--gold);
+  border-right-color:rgba(201,168,76,0.3);
+  animation:spin 1.4s linear infinite;
+}
+.loader-ring-2{
+  position:absolute;inset:10px;border-radius:50%;
+  border:1px solid transparent;
+  border-bottom-color:var(--gold2);
+  border-left-color:rgba(232,201,106,0.2);
+  animation:spin 2s linear infinite reverse;
+}
+.loader-ring-3{
+  position:absolute;inset:22px;border-radius:50%;
+  border:1px solid rgba(201,168,76,0.12);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* diamond in centre of ring */
+.loader-diamond{
+  position:absolute;top:50%;left:50%;
+  width:14px;height:14px;
+  background:var(--gold);
+  transform:translate(-50%,-50%) rotate(45deg);
+  box-shadow:0 0 18px rgba(201,168,76,0.8),0 0 40px rgba(201,168,76,0.3);
+  animation:diamondPulse 1.4s ease-in-out infinite;
+}
+@keyframes diamondPulse{0%,100%{transform:translate(-50%,-50%) rotate(45deg) scale(0.85);box-shadow:0 0 10px rgba(201,168,76,0.5)}50%{transform:translate(-50%,-50%) rotate(45deg) scale(1.1);box-shadow:0 0 26px rgba(201,168,76,1),0 0 50px rgba(201,168,76,0.4)}}
+
+/* logo text */
+.loader-name{
+  font-family:'Cinzel',serif;
+  font-size:clamp(30px,8vw,46px);
+  font-weight:400;letter-spacing:0.45em;
+  color:var(--gold);
+  text-shadow:0 0 40px rgba(201,168,76,0.4);
+  animation:letterFade 1s ease both;
+  margin-bottom:4px;
+}
+@keyframes letterFade{from{opacity:0;letter-spacing:0.8em}to{opacity:1;letter-spacing:0.45em}}
+.loader-dash{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin:5px 0 3px;
+}
+.loader-dash span{
+  display:block;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  animation:lineGrow 1s 0.3s ease both;width:0;
+}
+@keyframes lineGrow{to{width:44px}}
+.loader-bar-text{
+  font-family:'Cinzel',serif;font-size:10px;
+  letter-spacing:0.42em;color:var(--gold);opacity:0.8;
+}
+.loader-sub-text{
+  font-size:8.5px;letter-spacing:0.32em;color:var(--muted);
+  text-transform:uppercase;margin-top:2px;
+  animation:fadeIn 1s 0.6s ease both;opacity:0;
+}
+@keyframes fadeIn{to{opacity:1}}
+
+/* progress bar */
+.loader-progress-wrap{
+  margin-top:36px;width:200px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.loader-bar-track{
+  width:100%;height:1px;
+  background:rgba(255,255,255,0.06);
+  border-radius:1px;overflow:hidden;position:relative;
+}
+.loader-bar-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,var(--gold2),var(--gold));
+  border-radius:1px;
+  box-shadow:0 0 8px rgba(201,168,76,0.7);
+  transition:width 0.12s ease;
+}
+.loader-pct{
+  font-family:'Cinzel',serif;
+  font-size:10px;letter-spacing:0.2em;color:var(--muted);
+}
+
+/* floating gold sparks around the ring */
+.loader-spark{
+  position:absolute;width:3px;height:3px;border-radius:50%;
+  background:var(--gold2);
+  animation:sparkOrbit var(--od,3s) linear infinite;
+  animation-delay:var(--os,0s);
+  transform-origin:var(--tx,0px) var(--ty,0px);
+  opacity:0.8;
+}
+@keyframes sparkOrbit{
+  0%{transform:rotate(0deg) translateX(56px) rotate(0deg);opacity:0}
+  10%{opacity:0.9}
+  90%{opacity:0.9}
+  100%{transform:rotate(360deg) translateX(56px) rotate(-360deg);opacity:0}
+}
+
+/* ── PARTICLES BG ── */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.star{position:absolute;border-radius:50%;background:rgba(201,168,76,0.6);animation:twinkle var(--d,4s) ease-in-out infinite;animation-delay:var(--delay,0s)}
+@keyframes twinkle{0%,100%{opacity:0.1;transform:scale(0.8)}50%{opacity:0.8;transform:scale(1.2)}}
+
+/* ── MAIN WRAPPER ── */
+#app{
+  position:relative;z-index:1;
+  max-width:720px;
+  margin:0 auto;
+  padding:40px 20px 60px;
+}
+
+/* ── LOGO ── */
+.logo-block{
+  text-align:center;
+  margin-bottom:36px;
+  animation:fadeDown 0.7s ease both;
+}
+.logo-name{
+  font-family:'Cinzel',serif;
+  font-size:clamp(34px,8vw,52px);
+  font-weight:400;
+  letter-spacing:0.35em;
+  color:var(--gold);
+  text-shadow:0 0 40px rgba(201,168,76,0.35);
+  line-height:1;
+}
+.logo-dash{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin:6px 0 2px;
+}
+.logo-dash span{display:block;height:1px;width:40px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.logo-bar{font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.4em;color:var(--gold);opacity:0.85}
+.logo-sub{font-size:9px;letter-spacing:0.35em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+
+/* ── SEARCH ── */
+.search-wrap{
+  position:relative;margin-bottom:32px;
+  animation:fadeDown 0.7s 0.1s ease both;
+}
+.search-wrap svg{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--muted);pointer-events:none;
+}
+#searchInput{
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border2);
+  color:var(--text);
+  font-family:'Raleway',sans-serif;
+  font-size:14px;font-weight:400;
+  padding:13px 16px 13px 42px;
+  border-radius:var(--radius);
+  outline:none;
+  transition:border-color 0.3s,background 0.3s;
+}
+#searchInput::placeholder{color:var(--muted)}
+#searchInput:focus{border-color:var(--border);background:var(--card2)}
+
+/* ── CATEGORY GRID ── */
+#categoryGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  animation:fadeUp 0.6s 0.2s ease both;
+}
+
+/* ── CATEGORY CARD ── */
+.cat-card{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:var(--radius);
+  padding:18px 16px 16px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:border-color 0.3s,background 0.3s,transform 0.25s;
+  display:flex;flex-direction:column;gap:4px;
+  -webkit-tap-highlight-color:transparent;
+}
+.cat-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 0%,rgba(201,168,76,0.06) 0%,transparent 65%);
+  opacity:0;transition:opacity 0.3s;
+}
+.cat-card:hover{border-color:var(--border);background:var(--card2);transform:translateY(-2px)}
+.cat-card:hover::before{opacity:1}
+.cat-card:active{transform:translateY(0) scale(0.98)}
+
+.cat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.cat-icon{font-size:22px;line-height:1;flex-shrink:0}
+.premium-badge{
+  font-size:8px;font-weight:700;letter-spacing:0.15em;
+  background:rgba(201,168,76,0.15);
+  border:1px solid rgba(201,168,76,0.35);
+  color:var(--gold);
+  padding:2px 7px;border-radius:3px;text-transform:uppercase;
+  white-space:nowrap;
+}
+.cat-name{
+  font-family:'Cinzel',serif;
+  font-size:14px;font-weight:500;
+  color:var(--text);line-height:1.2;
+}
+.cat-desc{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:8px}
+.cat-footer{display:flex;align-items:center;justify-content:space-between}
+.cat-count{font-size:10px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase}
+.cat-arrow{
+  font-size:12px;color:var(--muted);
+  transition:transform 0.3s,color 0.3s;
+}
+.cat-card:hover .cat-arrow{transform:translateX(4px);color:var(--gold)}
+
+/* ── MENU VIEW (items panel) ── */
+#menuView{display:none;animation:fadeUp 0.4s ease both}
+#menuView.active{display:block}
+
+.back-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:none;border:none;
+  color:var(--muted);font-family:'Raleway',sans-serif;
+  font-size:13px;font-weight:500;letter-spacing:0.08em;
+  cursor:pointer;padding:4px 0;margin-bottom:24px;
+  transition:color 0.2s;
+}
+.back-btn:hover{color:var(--gold)}
+.back-btn svg{width:16px;height:16px;transition:transform 0.2s}
+.back-btn:hover svg{transform:translateX(-3px)}
+
+.menu-header{
+  text-align:center;
+  margin-bottom:28px;
+  padding-bottom:20px;
+  border-bottom:1px solid var(--border2);
+}
+.menu-header-icon{font-size:32px;margin-bottom:8px}
+.menu-header-title{
+  font-family:'Cinzel',serif;
+  font-size:clamp(20px,5vw,28px);
+  font-weight:500;letter-spacing:0.15em;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(201,168,76,0.25);
+}
+.menu-header-desc{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:0.05em}
+
+/* ── MENU ITEMS ── */
+.menu-items{display:flex;flex-direction:column;gap:1px}
+
+.menu-item{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  padding:16px 0;
+  border-bottom:1px solid var(--border2);
+  transition:background 0.2s;
+  position:relative;
+}
+.menu-item:last-child{border-bottom:none}
+.item-left{flex:1;min-width:0}
+.item-name{
+  font-weight:600;font-size:13px;
+  color:var(--text);
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+  line-height:1.3;
+  margin-bottom:4px;
+}
+.item-desc{font-size:12px;color:var(--muted);line-height:1.5;font-weight:300}
+.item-right{flex-shrink:0;text-align:right}
+.item-price{
+  font-family:'Cinzel',serif;
+  font-size:13px;font-weight:600;
+  color:var(--gold);
+  white-space:nowrap;
+}
+.item-price-line{
+  display:flex;align-items:center;justify-content:flex-end;gap:6px;
+}
+.price-sep{
+  display:block;width:32px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.5));
+  margin-bottom:3px;
+}
+
+/* ── SEARCH RESULTS ── */
+#searchResults{display:none;animation:fadeUp 0.4s ease both}
+#searchResults.active{display:block}
+.search-category-label{
+  font-family:'Cinzel',serif;
+  font-size:11px;letter-spacing:0.2em;color:var(--gold);
+  text-transform:uppercase;margin:20px 0 8px;opacity:0.7;
+}
+.no-results{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  #app{padding:28px 14px 50px}
+  .logo-name{font-size:32px}
+  #categoryGrid{grid-template-columns:1fr 1fr;gap:10px}
+  .cat-card{padding:14px 12px 12px}
+  .cat-name{font-size:13px}
+}
+@media(max-width:360px){
+  #categoryGrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-glow"></div>
+  <div class="loader-spark" style="--od:2.8s;--os:0s"></div>
+  <div class="loader-spark" style="--od:2.8s;--os:0.47s"></div>
+  <div class="loader-spark" style="--od:2.8s;--os:0.93s"></div>
+  <div class="loader-spark" style="--od:2.8s;--os:1.4s"></div>
+  <div class="loader-spark" style="--od:2.8s;--os:1.87s"></div>
+  <div class="loader-spark" style="--od:2.8s;--os:2.33s"></div>
+  <div class="loader-ring-wrap">
+    <div class="loader-ring"></div>
+    <div class="loader-ring-2"></div>
+    <div class="loader-ring-3"></div>
+    <div class="loader-diamond"></div>
+  </div>
+  <div class="loader-name">LUMINA</div>
+  <div class="loader-dash"><span></span><div class="loader-bar-text">BAR</div><span></span></div>
+  <div class="loader-sub-text">Exquisite Experiences, Redefined</div>
+  <div class="loader-progress-wrap">
+    <div class="loader-bar-track">
+      <div class="loader-bar-fill" id="loaderFill"></div>
+    </div>
+    <div class="loader-pct" id="loaderPct">0%</div>
+  </div>
+</div>
+
+<!-- Particles -->
+<div id="particles"></div>
+
+<div id="app">
+
+  <!-- LOGO -->
+  <div class="logo-block">
+    <div class="logo-name">LUMINA</div>
+    <div class="logo-dash"><span></span><div class="logo-bar">BAR</div><span></span></div>
+    <div class="logo-sub">Exquisite Experiences, Redefined</div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search drinks...">
+  </div>
+
+  <!-- CATEGORY GRID -->
+  <div id="categoryGrid"></div>
+
+  <!-- SEARCH RESULTS -->
+  <div id="searchResults"></div>
+
+  <!-- MENU ITEMS VIEW -->
+  <div id="menuView">
+    <button class="back-btn" id="backBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to Menu
+    </button>
+    <div class="menu-header">
+      <div class="menu-header-icon" id="menuIcon"></div>
+      <div class="menu-header-title" id="menuTitle"></div>
+      <div class="menu-header-desc" id="menuDesc"></div>
+    </div>
+    <div class="menu-items" id="menuItems"></div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// FULL MENU DATA — exact from photos/PDF
+// ══════════════════════════════════════════
+const MENU = [
+  {
+    id:'cocktails',
+    icon:'🍸',
+    name:'Cocktails',
+    desc:'Crafted with passion & precision',
+    premium:false,
+    items:[
+      {name:'Cosmopolitan',desc:'Vodka, Triple Sec, Cranberry & Lime',price:'₦8,000'},
+      {name:'Mojito',desc:'White Rum, Sugar, Mint & Lime',price:'₦8,000'},
+      {name:'Tequila Sunrise',desc:'Tequila, Orange Juice, Grenadine Syrup',price:'₦8,000'},
+      {name:'Pina Colada',desc:'Rum, Pineapple Juice, Coconut Cream',price:'₦8,000'},
+      {name:'Long Island Tea',desc:'Vodka, Tequila, Rum, Triple Sec, Gin & a splash of Cola',price:'₦9,000'},
+      {name:'Strawberry Margarita',desc:'Strawberry, Tequila, Lime Juice, Triple Sec',price:'₦9,000'},
+      {name:'Sex on the Beach',desc:'Peach Schnapps, Vodka, Orange Juice, Pineapple, Cranberry Juice',price:'₦9,000'},
+    ]
+  },
+  {
+    id:'special-cocktails',
+    icon:'✨',
+    name:'Special Cocktails',
+    desc:'Our signature luxury creations',
+    premium:true,
+    items:[
+      {name:'Whiskey Sour',desc:'Whiskey, Lemon Juice, Egg White, Angostura Bitters, Sugar',price:'₦8,000'},
+      {name:'Blowjob',desc:'Amaretto, Baileys Cream, Whipped Cream',price:'₦8,000'},
+      {name:'Bikini Martini',desc:'Coconut Rum, Vodka, Pineapple Juice, Grenadine',price:'₦8,000'},
+      {name:'Ocean Sunset',desc:'Blue Curacao, Sprite, Vodka, Orange Juice',price:'₦8,000'},
+      {name:'Strawberry Kisses',desc:'Gin, Strawberry Syrup, Lime Juice, Pineapple Juice, Cranberry Juice',price:'₦8,000'},
+      {name:'Frozen Strawberry Daiquiri',desc:'Strawberry, White Rum, Sugar, Lemon Juice',price:'₦9,000'},
+      {name:'Tropical Island',desc:'Vodka, Orange Juice, Blue Curacao, Lemon Juice, Grenadine',price:'₦9,000'},
+      {name:'Swamp Water Margarita',desc:'Blue Curacao, Tequila, Pineapple Juice, Coconut Milk, Lime Juice',price:'₦9,000'},
+      {name:'Blue Lady',desc:'Blue Curacao, Lemon Juice, Gin, Egg White',price:'₦8,000'},
+      {name:'Sunflower Afterwork',desc:'Campari, Lemon, Orange Liquor, Peach Schnapps',price:'₦9,000'},
+    ]
+  },
+  {
+    id:'mocktails',
+    icon:'🍹',
+    name:'Mocktails',
+    desc:'Premium non-alcoholic creations',
+    premium:false,
+    items:[
+      {name:'Virgin Colada',desc:'Coconut Milk, Pineapple Juice, Whipped Cream',price:'₦7,000'},
+      {name:'Money Bags',desc:'Mint, Lime Juice, Sugar Syrup',price:'₦7,000'},
+      {name:'Orange Punch',desc:'Pineapple, Lemon Juice, Orange Juice, Ice Soda',price:'₦7,000'},
+      {name:'Strawberry Mojito',desc:'Strawberry, Mint, Sugar Soda, Lime Juice',price:'₦7,000'},
+      {name:'Chapman',desc:'Fanta, Orange Juice, Lemonade, Angostura Bitters, Grenadine, Lemon Juice & Cucumber',price:'₦7,000'},
+      {name:'Virgin Mojito',desc:'Mint Leaves, Sugar Syrup, Soda',price:'₦7,000'},
+      {name:'Sweet Sunrise',desc:'Orange Juice, Grenadine',price:'₦7,000'},
+    ]
+  },
+  {
+    id:'wine-spirits',
+    icon:'🍷',
+    name:'Wine & Spirits',
+    desc:'Finest selection from around the world',
+    premium:true,
+    items:[
+      {name:'William Lawson',desc:'Scotch Whisky',price:'₦10,000 / ₦35,000'},
+      {name:'Jameson Irish',desc:'Irish Whiskey',price:'₦15,000 / ₦50,000'},
+      {name:'Absolut Vodka',desc:'Premium Swedish Vodka',price:'₦15,000 / ₦45,000'},
+      {name:'Jameson Black Barrel',desc:'Double-Charred Barrel Whiskey',price:'₦80,000'},
+      {name:'Jack Daniel',desc:"Tennessee Whiskey",price:'₦50,000'},
+      {name:'Olmeca Tequila',desc:'Premium Mexican Tequila',price:'₦50,000'},
+      {name:'Glenfiddich 12 Yrs',desc:'Single Malt Scotch Whisky',price:'₦110,000'},
+      {name:'Glenfiddich 15 Yrs',desc:'Single Malt Scotch Whisky',price:'₦130,000'},
+      {name:'Macmillan 12 Yrs',desc:'Blended Scotch Whisky',price:'₦130,000'},
+      {name:'Macmillan 15 Yrs',desc:'Blended Scotch Whisky',price:'₦160,000'},
+      {name:'Teeling Whiskey',desc:'Irish Single Malt',price:'₦90,000'},
+      {name:'Imperial Blue',desc:'Blended Indian Whisky',price:'₦5,000 / ₦20,000'},
+      {name:'Black Label',desc:"Johnnie Walker Black Label",price:'₦60,000'},
+      {name:'Red Label',desc:"Johnnie Walker Red Label",price:'₦40,000'},
+      {name:'Singleton',desc:'Single Malt Scotch Whisky',price:'₦120,000'},
+      {name:'8PM',desc:'Blended Whisky',price:'₦20,000'},
+      {name:'Campari',desc:'Italian Aperitivo',price:'₦15,000 / ₦60,000'},
+      {name:'X1',desc:'Premium Spirit',price:'₦5,000 / ₦20,000'},
+      {name:'Gordons',desc:'London Dry Gin',price:'₦5,000 / ₦20,000'},
+      {name:'Baileys',desc:'Original Irish Cream',price:'₦30,000'},
+      {name:'Origin Bitters',desc:'Premium Bitters',price:'₦2,500 / ₦20,000'},
+      {name:'Monkey Shoulder',desc:'Blended Malt Scotch Whisky',price:'₦70,000'},
+      {name:'Lords Gin',desc:'Premium Gin',price:'₦20,000'},
+    ]
+  },
+  {
+    id:'cognac',
+    icon:'🥃',
+    name:'Cognac',
+    desc:'Refined French elegance',
+    premium:true,
+    items:[
+      {name:'Hennessy VS',desc:'Very Special Cognac',price:'₦120,000'},
+      {name:'Hennessy VSOP',desc:'Very Superior Old Pale',price:'₦180,000'},
+      {name:'Martel VS',desc:'Fine Cognac',price:'₦120,000'},
+    ]
+  },
+  {
+    id:'cocktail-shots',
+    icon:'🔥',
+    name:'Cocktail Shots',
+    desc:'Quick premium shots',
+    premium:false,
+    items:[
+      {name:'Tequila',desc:'Classic shot',price:'₦3,500'},
+      {name:'William Lawson',desc:'Scotch shot',price:'₦3,500'},
+      {name:'Barcardi',desc:'Rum shot',price:'₦3,500'},
+      {name:'Absolut',desc:'Vodka shot',price:'₦3,500'},
+      {name:'Jameson',desc:'Irish whiskey shot',price:'₦3,500'},
+      {name:'Lords Gin',desc:'Gin shot',price:'₦2,500'},
+    ]
+  },
+  {
+    id:'champagne',
+    icon:'🍾',
+    name:'Champagne',
+    desc:'Celebrate in style',
+    premium:true,
+    items:[
+      {name:'Andre Rose',desc:'Classic Rosé Champagne',price:'₦35,000'},
+      {name:'Express Mojito',desc:'Champagne Cocktail',price:'₦30,000'},
+      {name:'Angel Sparkling',desc:'Sparkling Wine',price:'₦15,000'},
+      {name:'Chamdor',desc:'Sparkling Grape Juice',price:'₦15,000'},
+    ]
+  },
+  {
+    id:'wine',
+    icon:'🍷',
+    name:'Wine',
+    desc:'Curated wine selection',
+    premium:false,
+    items:[
+      {name:'Xpression Sweet',desc:'Sweet Red Wine',price:'₦20,000'},
+      {name:'Four Cousins',desc:'South African Wine',price:'₦20,000'},
+      {name:'4th Street',desc:'Sweet Natural Wine',price:'₦20,000'},
+      {name:'Carlo Rossi Sweet Red',desc:'Californian Red Wine',price:'₦20,000'},
+      {name:'Drostdy Hof',desc:'South African Wine',price:'₦20,000'},
+      {name:'Domino Red Wine',desc:'Red Wine',price:'₦20,000'},
+      {name:'Vintage',desc:'Classic Vintage Wine',price:'₦20,000'},
+      {name:'Donfelder',desc:'German Red Wine',price:'₦20,000'},
+      {name:'Agor',desc:'Premium Wine',price:'₦20,000'},
+    ]
+  },
+  {
+    id:'milkshakes',
+    icon:'🥤',
+    name:'Milkshakes',
+    desc:'Creamy indulgence',
+    premium:false,
+    items:[
+      {name:'Oreo Milkshake',desc:'Oreo Biscuit, Chocolate Ice Cream, Milk & Whipped Cream',price:'₦8,000'},
+      {name:'Banana Milkshake',desc:'Banana, Vanilla Ice Cream, Milk & Whipped Cream',price:'₦8,000'},
+      {name:'Strawberry Milkshake',desc:'Strawberry Ice Cream, Milk & Whipped Cream',price:'₦8,000'},
+      {name:'Vanilla Milkshake',desc:'Vanilla Ice Cream, Milk & Whipped Cream',price:'₦8,000'},
+      {name:'Savannah Flavored',desc:'Strawberry, Ginger, Cinnamon, Mint Leaf',price:'₦8,000'},
+    ]
+  },
+  {
+    id:'smoothies',
+    icon:'🍋',
+    name:'Smoothies & Lemonade',
+    desc:'Fresh & revitalizing',
+    premium:false,
+    items:[
+      {name:'Banana, Orange & Pineapple',desc:'Fresh fruit smoothie',price:'₦7,000'},
+      {name:'Banana, Groundnut & Vanilla',desc:'Creamy blended smoothie',price:'₦7,000'},
+      {name:'Fresh Lemonade',desc:'Fresh Lemon Juice with Ice',price:'₦7,000'},
+    ]
+  },
+  {
+    id:'arabian-tea',
+    icon:'🫖',
+    name:'Arabian Tea',
+    desc:'Exotic aromatic blends',
+    premium:false,
+    items:[
+      {name:'Savannah Red',desc:'Hibiscus Brown, Ginger',price:'₦3,000 / ₦3,500'},
+      {name:'Tropical',desc:'Cinnamon, Clove, Ginger, Lemon Grass',price:'₦3,000 / ₦3,500'},
+      {name:'Ginger Tea',desc:'Turmeric, Zest, Cinnamon',price:'₦3,000 / ₦3,500'},
+      {name:'Arabian Hibiscus',desc:'Hibiscus Brown, Ginger',price:'₦3,000 / ₦3,500'},
+      {name:'Savannah Flavored',desc:'Strawberry, Ginger, Cinnamon, Mint Leaf',price:'₦3,000 / ₦3,500'},
+    ]
+  },
+  {
+    id:'ice-tea',
+    icon:'🧊',
+    name:'Ice Tea',
+    desc:'Cool & refreshing',
+    premium:false,
+    items:[
+      {name:'Lemon Ice Tea',desc:'Refreshing Ice Tea, Fresh Lime/Lemons, Mint Leaves & Ice',price:'₦5,000'},
+      {name:'Peach Ice Tea',desc:'Chilled peach-infused tea with ice',price:'₦5,000'},
+      {name:'Mixed Berry Ice Tea',desc:'Berry blend iced tea',price:'₦5,000'},
+    ]
+  },
+  {
+    id:'beer',
+    icon:'🍺',
+    name:'Beer',
+    desc:'Cold & crisp selection',
+    premium:false,
+    items:[
+      {name:'Heineken',desc:'Premium Lager',price:'₦2,500'},
+      {name:'Hero',desc:'Nigerian Lager',price:'₦2,000'},
+      {name:'Big Stout',desc:'Nigerian Dark Stout',price:'₦2,500'},
+      {name:'Legend',desc:'Extra Stout',price:'₦2,500'},
+      {name:'Gulder',desc:'Premium Lager',price:'₦2,000'},
+      {name:'Trophy',desc:'Nigerian Lager',price:'₦2,000'},
+      {name:'Trophy Stout',desc:'Dark Stout',price:'₦2,500'},
+      {name:'Budweiser',desc:'American Lager',price:'₦2,500'},
+      {name:'Desperado',desc:'Tequila Flavoured Beer',price:'₦2,000'},
+      {name:'Origin Beer',desc:'Premium Nigerian Beer',price:'₦2,500'},
+      {name:'Tiger',desc:'Asian Premium Lager',price:'₦2,000'},
+      {name:'Smirnoff Ice',desc:'Vodka Mix',price:'₦2,500'},
+      {name:'Life',desc:'Nigerian Lager',price:'₦2,000'},
+      {name:'Goldberg Lager',desc:'Nigerian Lager',price:'₦2,000'},
+      {name:'Goldberg Black',desc:'Dark Nigerian Beer',price:'₦2,000'},
+      {name:'Medium Stout',desc:'Medium Dark Stout',price:'₦2,000'},
+      {name:'Star / Star Lite / Castle Life',desc:'Nigerian Premium Beers',price:'₦2,000'},
+    ]
+  },
+  {
+    id:'yoghurt-juice',
+    icon:'🥛',
+    name:'Yoghurt & Juice',
+    desc:'Smooth & fruity',
+    premium:false,
+    items:[
+      {name:'Hollandia Yoghurt',desc:'Premium Yoghurt Drink',price:'₦4,000'},
+      {name:'Chivita',desc:'Premium Fruit Juice',price:'₦4,000'},
+      {name:'Cranberry',desc:'Premium Cranberry Juice',price:'₦9,000'},
+    ]
+  },
+  {
+    id:'other-drinks',
+    icon:'🥂',
+    name:'Other Drinks',
+    desc:'More refreshments',
+    premium:false,
+    items:[
+      {name:'Water',desc:'Chilled Still Water',price:'₦500'},
+      {name:'Monster',desc:'Energy Drink',price:'₦3,000'},
+      {name:'Fayrouz',desc:'Sparkling Fruit Drink',price:'₦1,000'},
+      {name:'Black Bullet',desc:'Premium Energy Drink',price:'₦3,500'},
+      {name:'Double Back',desc:'Energy Drink',price:'₦3,000'},
+      {name:'Calypso Passion Fruit',desc:'Passion Fruit Drink',price:'₦2,000'},
+      {name:'Lords Gin Cocktail',desc:'Ready-to-drink Gin Mix',price:'₦2,000'},
+      {name:'Coke / Fanta / Sprite',desc:'Classic Soft Drinks',price:'₦1,000'},
+      {name:'Malt',desc:'Nigerian Malt Drink',price:'₦1,200'},
+      {name:'Origin Bitters',desc:'Bitters Drink',price:'₦2,500'},
+      {name:'Kunu Zaki',desc:'Traditional Nigerian Drink',price:'₦1,000'},
+    ]
+  },
+  {
+    id:'starters',
+    icon:'🍗',
+    name:'Starter & Sides',
+    desc:'Perfect bites to begin your night',
+    premium:false,
+    items:[
+      {name:'Hot & Spicy Wings',desc:'Crispy chicken wings tossed in our signature hot sauce',price:'₦6,500'},
+      {name:'BBQ Wings',desc:'Juicy wings glazed in smoky-sweet barbecue sauce',price:'₦6,500'},
+      {name:'Gizzard',desc:'Well prepared to sooth your taste',price:'₦5,300'},
+      {name:'Yamarita',desc:'Tender yam slices coated in eggs',price:'₦5,000'},
+      {name:'Fried Yam',desc:'Classic yam chunks, crispy on the outside & fluffy inside, served with ketchup',price:'₦3,000'},
+      {name:'Potato Chips',desc:'Thinly sliced potatoes, fried till golden and crunchy',price:'₦3,000'},
+    ]
+  },
+  {
+    id:'proteins',
+    icon:'🥩',
+    name:'Proteins',
+    desc:'Peppered & sautéed to perfection',
+    premium:false,
+    items:[
+      {name:'Chicken',desc:'Peppered or Sautéed',price:'₦7,000'},
+      {name:'Beef',desc:'Peppered or Sautéed',price:'₦6,000'},
+      {name:'Goat Meat',desc:'Peppered or Sautéed',price:'₦5,500'},
+      {name:'Turkey',desc:'Peppered or Sautéed',price:'₦8,000'},
+      {name:'Titus Fish',desc:'Peppered or Sautéed',price:'₦5,500'},
+      {name:'Cat Fish',desc:'Peppered or Sautéed',price:'₦6,500'},
+    ]
+  },
+  {
+    id:'rice',
+    icon:'🍚',
+    name:'Rice Dishes',
+    desc:"Hearty Nigerian rice favourites",
+    premium:false,
+    items:[
+      {name:'White Rice',desc:'Well cooked white rice',price:'₦3,000'},
+      {name:'Coconut Rice',desc:'Rice cooked in creamy coconut milk with a hint of spice',price:'₦5,500'},
+      {name:'Native Rice',desc:'Traditional palm oil rice, rich in local spices and garnished with smoked fish',price:'₦4,500'},
+      {name:'Jollof Rice',desc:'Classic spicy jollof rice',price:'₦4,000'},
+      {name:'Fried Rice',desc:'Stir-fried rice mixed with vegetables',price:'₦5,500'},
+      {name:"Arithan's Special Fried Rice",desc:'Thinly sliced potatoes, fried till golden and crunchy',price:'₦10,000'},
+    ]
+  },
+  {
+    id:'pasta',
+    icon:'🍝',
+    name:'Pasta / Noodles',
+    desc:'Comforting pasta & noodle creations',
+    premium:false,
+    items:[
+      {name:'Chicken Noodles',desc:'Noodles tossed with tender chicken chunks and vegetables',price:'₦5,000'},
+      {name:'Beef Noodles',desc:'Noodles mixed with juicy beef slices and a blend of spices',price:'₦6,200'},
+      {name:'Mixed Noodles',desc:'Noodles loaded with a mix of chicken, beef, and veggies',price:'₦6,000'},
+      {name:'Jollof Spaghetti',desc:'Spaghetti cooked in rich jollof sauce and veggies',price:'₦5,000'},
+      {name:"Spaghetti à la Arithan",desc:"Chef's signature creation – a mix of shrimps, chicken chunks, beef chunks, sausage, and scrambled eggs, stir-fried with vegetables",price:'₦10,500'},
+    ]
+  },
+  {
+    id:'soups',
+    icon:'🍲',
+    name:'Soups',
+    desc:'Served with your choice of swallow & protein',
+    premium:false,
+    note:'All soups are served with your choice of swallow (Eba, Wheat, Semo, or Poundo) and protein (Chicken, Beef, Goat, Titus, Catfish or Assorted). Preparation Time: 15–30 mins',
+    items:[
+      {name:'Oha',desc:'Traditional Oha Soup',price:'₦8,500'},
+      {name:'Vegetable',desc:'Fresh Vegetable Soup',price:'₦8,500'},
+      {name:'Goat Meat',desc:'Goat Meat Soup',price:'₦8,500'},
+      {name:'Ogbono',desc:'Ogbono Soup',price:'₦8,500'},
+      {name:'Okro',desc:'Fresh Okro Soup',price:'₦8,500'},
+    ]
+  },
+  {
+    id:'pepper-soup',
+    icon:'🌶',
+    name:'Pepper Soup',
+    desc:'Preparation time 20–35 mins',
+    premium:false,
+    items:[
+      {name:'Goat Meat',desc:'Spicy goat meat pepper soup',price:'₦7,000'},
+      {name:'Assorted',desc:'Mixed assorted pepper soup',price:'₦5,500'},
+      {name:'Cat Fish',desc:'Fresh catfish pepper soup',price:'₦6,500'},
+      {name:'Chicken',desc:'Spicy chicken pepper soup',price:'₦7,000'},
+    ]
+  },
+  {
+    id:'grill',
+    icon:'🔥',
+    name:'Grill Corner',
+    desc:'Flame-grilled to smoky perfection',
+    premium:false,
+    items:[
+      {name:'BBQ Catfish',desc:'Medium/Large Catfish served with coleslaw and chips',price:'₦13,000 / ₦15,000'},
+      {name:'Grilled Tilapia',desc:'Smoky & seasoned tilapia, served with coleslaw and chips',price:'₦10,000 / ₦15,000'},
+      {name:'Grilled Croaker',desc:'Smoky & seasoned Croaker, served with coleslaw and chips',price:'₦10,000 / ₦15,000'},
+      {name:'Grilled Turkey',desc:'Juicy turkey wing, marinated and flame-grilled',price:'₦9,000'},
+      {name:'Bole & Fish',desc:'Roasted plantain with grilled fish',price:'₦5,500'},
+      {name:'Beef Kebab',desc:'Premium beef kebab',price:'₦4,000'},
+      {name:'Chicken Kebab',desc:'Seasoned chicken kebab',price:'₦4,000'},
+      {name:'Chicken Thighs',desc:'Grilled chicken thighs',price:'₦3,000'},
+      {name:'Goat Kebab',desc:'Grilled goat kebab',price:'₦3,500'},
+      {name:'Turkey Gizzard',desc:'Grilled turkey gizzard',price:'₦4,000'},
+    ]
+  },
+  {
+    id:'pizza',
+    icon:'🍕',
+    name:'Pizzas',
+    desc:'10 inches / 12 inches',
+    premium:true,
+    items:[
+      {name:'Margarita',desc:'Classic pizza topped with fresh tomato sauce, mozzarella cheese, and a hint of basil/parsley',price:'₦11,000 / ₦15,000'},
+      {name:'Pepperoni',desc:'Pizza layered with spicy pepperoni slices and melted cheese',price:'₦11,000 / ₦15,000'},
+      {name:'Beef (Suya/BBQ)',desc:'Beef, seasoned Suya-style or with smoky BBQ sauce, topped with cheese and vegetables',price:'₦11,000 / ₦15,000'},
+      {name:'Chicken (Suya/BBQ)',desc:'Tender chicken, prepared either Suya-style or in BBQ sauce, with cheese',price:'₦11,000 / ₦15,000'},
+      {name:'Sausage',desc:'Sausage slices, combined with melted cheese and tomato base for a classic taste',price:'₦11,000 / ₦15,000'},
+      {name:'Half & Half',desc:'Double the flavour – customize your pizza with any two toppings of your choice!',price:'₦11,000 / ₦15,000'},
+      {name:"Arithan's Special Pizza",desc:"A perfect blend of beef, sausages, chicken, and pepperoni, layered with rich cheese and our signature sauce on a golden crust",price:'₦12,500 / ₦15,000'},
+    ]
+  },
+  {
+    id:'wraps',
+    icon:'🌯',
+    name:'Wraps & Burgers',
+    desc:'Loaded with flavour, wrapped in style',
+    premium:false,
+    items:[
+      {name:'Beef Shawarma',desc:'Classic beef shawarma wrap',price:'₦4,500'},
+      {name:'Chicken Shawarma',desc:'Classic chicken shawarma wrap',price:'₦4,500'},
+      {name:'Mixed Shawarma',desc:'Combination of chicken and beef',price:'₦5,500'},
+      {name:'All-In-One Wrap',desc:'Chicken, beef, double-sausage, and melted cheese',price:'₦7,500'},
+      {name:'Classic Beef Shawarma',desc:'Premium beef shawarma',price:'₦6,500'},
+      {name:'Classic Chicken Shawarma',desc:'Premium chicken shawarma',price:'₦6,500'},
+      {name:'Double Steaked Cheese Burger',desc:'Packed with double steak & cheese',price:'₦7,500'},
+      {name:'2XL Cheese Burger',desc:'Sausage slices, combined with melted cheese and tomato base for a classic taste',price:'₦10,000'},
+    ]
+  },
+  {
+    id:'extras',
+    icon:'➕',
+    name:'Extras / Add-Ons',
+    desc:'Enhance your meal',
+    premium:false,
+    items:[
+      {name:'Eggs',desc:'',price:'₦1,000'},
+      {name:'Plantain',desc:'',price:'₦2,500'},
+      {name:'Colesaw',desc:'',price:'₦2,500'},
+      {name:'Egg Sauce',desc:'',price:'₦3,000'},
+      {name:'Swallow',desc:'Wheat / Semo / Eba / Poundo',price:'₦1,000'},
+      {name:'Mozzarella Cheese',desc:'',price:'₦2,000'},
+      {name:'Cheddar Cheese',desc:'',price:'₦1,500'},
+      {name:'Sausages',desc:'',price:'₦800'},
+      {name:'Extra Patty',desc:'',price:'₦2,000'},
+      {name:'Takeaway',desc:'Packaging fee',price:'₦500'},
+    ]
+  },
+];
+
+// ══════════════════════════════════════════
+// LOADER
+// ══════════════════════════════════════════
+(function(){
+  const loader  = document.getElementById('loader');
+  const fill    = document.getElementById('loaderFill');
+  const pct     = document.getElementById('loaderPct');
+  const app     = document.getElementById('app');
+
+  // Hide app until ready
+  app.style.opacity = '0';
+  app.style.transform = 'translateY(12px)';
+
+  let progress = 0;
+  // Accelerate naturally: fast at start, slow near end, snap to 100 on fonts
+  const speeds = [14,12,10,8,6,5,4,3,2,1.5,1];
+
+  const tick = setInterval(() => {
+    const idx = Math.min(Math.floor(progress / 10), speeds.length - 1);
+    progress = Math.min(progress + speeds[idx] * (0.6 + Math.random() * 0.8), 98);
+    fill.style.width = progress + '%';
+    pct.textContent  = Math.floor(progress) + '%';
+  }, 90);
+
+  function finish() {
+    clearInterval(tick);
+    fill.style.transition = 'width 0.3s ease';
+    fill.style.width = '100%';
+    pct.textContent = '100%';
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      // Reveal app
+      app.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+      app.style.opacity    = '1';
+      app.style.transform  = 'translateY(0)';
+    }, 380);
+  }
+
+  // Fire on fonts + window load, whichever is later, min 1.6s for drama
+  const minTime = new Promise(r => setTimeout(r, 1600));
+  const loaded  = new Promise(r => {
+    if (document.fonts) {
+      document.fonts.ready.then(r);
+    } else {
+      window.addEventListener('load', r);
+    }
+  });
+  Promise.all([minTime, loaded]).then(finish);
+})();
+
+// ══════════════════════════════════════════
+// PARTICLES
+// ══════════════════════════════════════════
+(function(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<55;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()*2+1;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${3+Math.random()*5}s;--delay:${Math.random()*6}s;opacity:0.1`;
+    c.appendChild(s);
+  }
+})();
+
+// ══════════════════════════════════════════
+// RENDER CATEGORY GRID
+// ══════════════════════════════════════════
+function renderGrid(data){
+  const grid=document.getElementById('categoryGrid');
+  grid.innerHTML='';
+  data.forEach((cat,i)=>{
+    const card=document.createElement('div');
+    card.className='cat-card';
+    card.style.animationDelay=(i*0.04)+'s';
+    card.innerHTML=`
+      <div class="cat-top">
+        <span class="cat-icon">${cat.icon}</span>
+        ${cat.premium?'<span class="premium-badge">PREMIUM</span>':''}
+      </div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-desc">${cat.desc}</div>
+      <div class="cat-footer">
+        <span class="cat-count">${cat.items.length} ITEMS</span>
+        <span class="cat-arrow">→</span>
+      </div>`;
+    card.addEventListener('click',()=>showCategory(cat));
+    grid.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════
+// SHOW CATEGORY
+// ══════════════════════════════════════════
+function showCategory(cat){
+  document.getElementById('categoryGrid').style.display='none';
+  document.getElementById('searchResults').classList.remove('active');
+  document.getElementById('searchResults').style.display='none';
+  document.querySelector('.search-wrap').style.display='none';
+  document.querySelector('.logo-block').style.display='none';
+
+  const view=document.getElementById('menuView');
+  view.classList.add('active');
+
+  document.getElementById('menuIcon').textContent=cat.icon;
+  document.getElementById('menuTitle').textContent=cat.name;
+  document.getElementById('menuDesc').textContent=cat.desc+(cat.note?' · '+cat.note:'');
+
+  const container=document.getElementById('menuItems');
+  container.innerHTML='';
+
+  cat.items.forEach(item=>{
+    const div=document.createElement('div');
+    div.className='menu-item';
+    div.innerHTML=`
+      <div class="item-left">
+        <div class="item-name">${item.name}</div>
+        ${item.desc?`<div class="item-desc">${item.desc}</div>`:''}
+      </div>
+      <div class="item-right">
+        <div class="price-sep"></div>
+        <div class="item-price">${item.price}</div>
+      </div>`;
+    container.appendChild(div);
+  });
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════
+// BACK BUTTON
+// ══════════════════════════════════════════
+document.getElementById('backBtn').addEventListener('click',()=>{
+  document.getElementById('menuView').classList.remove('active');
+  document.getElementById('menuView').style.display='';
+  document.getElementById('categoryGrid').style.display='';
+  document.querySelector('.search-wrap').style.display='';
+  document.querySelector('.logo-block').style.display='';
+  document.getElementById('searchInput').value='';
+  renderGrid(MENU);
+});
+
+// ══════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════
+document.getElementById('searchInput').addEventListener('input',function(){
+  const q=this.value.trim().toLowerCase();
+  const sr=document.getElementById('searchResults');
+  const grid=document.getElementById('categoryGrid');
+
+  if(!q){
+    sr.classList.remove('active');sr.style.display='none';
+    grid.style.display='';
+    renderGrid(MENU);
+    return;
+  }
+  grid.style.display='none';
+  sr.style.display='block';sr.classList.add('active');
+  sr.innerHTML='';
+
+  let found=0;
+  MENU.forEach(cat=>{
+    const matched=cat.items.filter(it=>
+      it.name.toLowerCase().includes(q)||
+      (it.desc&&it.desc.toLowerCase().includes(q))
+    );
+    if(matched.length){
+      found+=matched.length;
+      const label=document.createElement('div');
+      label.className='search-category-label';
+      label.textContent=`${cat.icon} ${cat.name}`;
+      sr.appendChild(label);
+      const list=document.createElement('div');
+      list.className='menu-items';
+      matched.forEach(item=>{
+        const div=document.createElement('div');
+        div.className='menu-item';
+        div.innerHTML=`
+          <div class="item-left">
+            <div class="item-name">${item.name}</div>
+            ${item.desc?`<div class="item-desc">${item.desc}</div>`:''}
+          </div>
+          <div class="item-right">
+            <div class="price-sep"></div>
+            <div class="item-price">${item.price}</div>
+          </div>`;
+        list.appendChild(div);
+      });
+      sr.appendChild(list);
+    }
+  });
+
+  if(!found){
+    sr.innerHTML='<div class="no-results">No items found for "'+this.value+'"</div>';
+  }
+});
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderGrid(MENU);
+</script>
+</body>
+</html>
